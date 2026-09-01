@@ -1,0 +1,66 @@
+# Environment and secrets
+
+.env
+.env.*
+*.secret
+secrets/
+credentials/
+
+# SSH and private keys
+
+*.pem
+*.key
+id_rsa
+id_rsa.*
+*.pub
+
+# Certificates
+
+*.crt
+*.cer
+*.p12
+*.pfx
+
+# Python
+
+**pycache**/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# macOS
+
+.DS_Store
+
+# IDE
+
+.vscode/settings.json
+.idea/
+
+# Logs
+
+*.log
+logs/
+
+# Temporary files
+
+tmp/
+temp/
+
+# Local data
+
+data/
+cache/
+
+# Terraform
+
+.terraform/
+*.tfstate
+*.tfstate.*
+
+# Docker local overrides
+
+docker-compose.override.yml
+
