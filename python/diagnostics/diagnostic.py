@@ -9,11 +9,13 @@ Collects basic information about the system and produces
 a simple infrastructure diagnostic report.
 """
 
+import os
 import platform
 import shutil
 import socket
-import sys
 from datetime import datetime, timezone
+
+import psutil
 
 
 def get_system_info():
@@ -31,13 +33,12 @@ def get_system_info():
 def get_cpu_info():
     """Collect CPU information."""
     return {
-        "logical_cpus": __import__("os").cpu_count(),
+        "logical_cpus": os.cpu_count(),
     }
 
 
 def get_network_info():
     """Collect network interface information."""
-    psutil = __import__("psutil")
     interfaces = []
 
     for name, addresses in psutil.net_if_addrs().items():
@@ -47,9 +48,9 @@ def get_network_info():
         ipv6_addresses = []
 
         for address in addresses:
-            if address.family == __import__("socket").AF_INET:
+            if address.family == socket.AF_INET:
                 ipv4_addresses.append(address.address)
-            elif address.family == __import__("socket").AF_INET6:
+            elif address.family == socket.AF_INET6:
                 ipv6_addresses.append(address.address)
 
         if ipv4_addresses or ipv6_addresses:
@@ -67,7 +68,7 @@ def get_network_info():
 
 def get_memory_info():
     """Collect basic memory information."""
-    memory = __import__("psutil").virtual_memory()
+    memory = psutil.virtual_memory()
 
     return {
         "total_gb": round(memory.total / (1024**3), 2),
