@@ -35,6 +35,8 @@ Current capabilities:
 * Network interface detection
 * IPv4 and IPv6 address detection
 * Network interface status
+* Default gateway detection
+* Default gateway interface detection
 
 ## Requirements
 
@@ -78,9 +80,10 @@ Basic system diagnostics:
 
 Advanced network diagnostics:
 
+* Default gateway detection
+* Default gateway interface detection
 * Connectivity tests
 * DNS resolution
-* Default gateway
 * Network reachability
 
 ### v0.3

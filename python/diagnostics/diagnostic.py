@@ -13,6 +13,7 @@ import os
 import platform
 import shutil
 import socket
+import subprocess
 from datetime import datetime, timezone
 
 import psutil
@@ -64,6 +65,30 @@ def get_network_info():
             )
 
     return interfaces
+
+
+def get_default_route():
+    """Collect the default gateway and network interface."""
+    output = subprocess.check_output(
+        ["route", "-n", "get", "default"],
+        text=True,
+    )
+
+    gateway = None
+    interface = None
+
+    for line in output.splitlines():
+        line = line.strip()
+
+        if line.startswith("gateway:"):
+            gateway = line.split(":", 1)[1].strip()
+        elif line.startswith("interface:"):
+            interface = line.split(":", 1)[1].strip()
+
+    return {
+        "gateway": gateway,
+        "interface": interface,
+    }
 
 
 def get_memory_info():
@@ -118,6 +143,10 @@ def main():
     print("=" * 50)
     print("Network")
     print("=" * 50)
+    route = get_default_route()
+    print(f"Default Gateway: {route['gateway']}")
+    print(f"Gateway Interface: {route['interface']}")
+    print()
 
     for interface in get_network_info():
         status = "UP" if interface["is_up"] else "DOWN"
