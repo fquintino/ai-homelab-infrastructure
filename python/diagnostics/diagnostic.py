@@ -34,29 +34,36 @@ def get_cpu_info():
         "logical_cpus": __import__("os").cpu_count(),
     }
 
+
 def get_network_info():
     """Collect network interface information."""
+    psutil = __import__("psutil")
     interfaces = []
 
-    for name, addresses in __import__("psutil").net_if_addrs().items():
-        stats = __import__("psutil").net_if_stats().get(name)
+    for name, addresses in psutil.net_if_addrs().items():
+        stats = psutil.net_if_stats().get(name)
 
-        interface = {
-            "name": name,
-            "is_up": stats.isup if stats else None,
-            "addresses": [],
-        }
+        ipv4_addresses = []
+        ipv6_addresses = []
 
         for address in addresses:
-            if address.family.name in ("AF_INET", "AF_INET6"):
-                interface["addresses"].append(address.address)
+            if address.family == __import__("socket").AF_INET:
+                ipv4_addresses.append(address.address)
+            elif address.family == __import__("socket").AF_INET6:
+                ipv6_addresses.append(address.address)
 
-        if interface["addresses"]:
-            interfaces.append(interface)
+        if ipv4_addresses or ipv6_addresses:
+            interfaces.append(
+                {
+                    "name": name,
+                    "is_up": stats.isup if stats else None,
+                    "ipv4": ipv4_addresses,
+                    "ipv6": ipv6_addresses,
+                }
+            )
 
-    return {
-        "interfaces": interfaces,
-    }
+    return interfaces
+
 
 def get_memory_info():
     """Collect basic memory information."""
@@ -105,7 +112,25 @@ def main():
 
     print_section("System", get_system_info())
     print_section("CPU", get_cpu_info())
-    print_section("Network", get_network_info())
+
+    print()
+    print("=" * 50)
+    print("Network")
+    print("=" * 50)
+
+    for interface in get_network_info():
+        status = "UP" if interface["is_up"] else "DOWN"
+        print(f"Interface: {interface['name']}")
+        print(f"  Status: {status}")
+
+        if interface["ipv4"]:
+            print(f"  IPv4: {', '.join(interface['ipv4'])}")
+
+        if interface["ipv6"]:
+            print(f"  IPv6: {', '.join(interface['ipv6'])}")
+
+    print()
+
     print_section("Memory", get_memory_info())
     print_section("Disk", get_disk_info())
 

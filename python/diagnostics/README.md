@@ -64,17 +64,24 @@ python python/diagnostics/diagnostic.py
 
 ### v0.1
 
-Basic system diagnostics.
+Basic system diagnostics:
+
+* Operating system
+* CPU
+* Memory
+* Storage
+* Network interfaces
+* IPv4 and IPv6 addresses
+* Network interface status
 
 ### v0.2
 
-Network diagnostics:
+Advanced network diagnostics:
 
-* Network interfaces
-* IP configuration
 * Connectivity tests
 * DNS resolution
 * Default gateway
+* Network reachability
 
 ### v0.3
 
