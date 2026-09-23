@@ -32,6 +32,9 @@ Current capabilities:
 * CPU information
 * Memory information
 * Root filesystem usage
+* Network interface detection
+* IPv4 and IPv6 address detection
+* Network interface status
 
 ## Requirements
 

@@ -34,6 +34,29 @@ def get_cpu_info():
         "logical_cpus": __import__("os").cpu_count(),
     }
 
+def get_network_info():
+    """Collect network interface information."""
+    interfaces = []
+
+    for name, addresses in __import__("psutil").net_if_addrs().items():
+        stats = __import__("psutil").net_if_stats().get(name)
+
+        interface = {
+            "name": name,
+            "is_up": stats.isup if stats else None,
+            "addresses": [],
+        }
+
+        for address in addresses:
+            if address.family.name in ("AF_INET", "AF_INET6"):
+                interface["addresses"].append(address.address)
+
+        if interface["addresses"]:
+            interfaces.append(interface)
+
+    return {
+        "interfaces": interfaces,
+    }
 
 def get_memory_info():
     """Collect basic memory information."""
@@ -82,6 +105,7 @@ def main():
 
     print_section("System", get_system_info())
     print_section("CPU", get_cpu_info())
+    print_section("Network", get_network_info())
     print_section("Memory", get_memory_info())
     print_section("Disk", get_disk_info())
 
