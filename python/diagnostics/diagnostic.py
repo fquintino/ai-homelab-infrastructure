@@ -91,6 +91,20 @@ def get_default_route():
     }
 
 
+def check_gateway_connectivity(gateway):
+    """Check connectivity to the default gateway."""
+    if not gateway:
+        return False
+
+    result = subprocess.run(
+        ["ping", "-c", "1", gateway],
+        capture_output=True,
+        text=True,
+    )
+
+    return result.returncode == 0
+
+
 def get_memory_info():
     """Collect basic memory information."""
     memory = psutil.virtual_memory()
@@ -146,6 +160,8 @@ def main():
     route = get_default_route()
     print(f"Default Gateway: {route['gateway']}")
     print(f"Gateway Interface: {route['interface']}")
+    gateway_reachable = check_gateway_connectivity(route["gateway"])
+    print(f"Gateway Reachable: {'YES' if gateway_reachable else 'NO'}")
     print()
 
     for interface in get_network_info():
