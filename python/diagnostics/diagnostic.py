@@ -14,9 +14,107 @@ import platform
 import shutil
 import socket
 import subprocess
+import json
 from datetime import datetime, timezone
 
 import psutil
+
+APPLE_CONTAINER_HOST = "aiserver@192.168.1.20"
+APPLE_CONTAINER_SSH_KEY = os.path.expanduser("~/.ssh/id_ed25519_homelab")
+APPLE_CONTAINER_CLI = (
+    "/Users/aiserver/Library/Application Support/"
+    "dev.wouter.davit/platform/1.3.1/bin/container"
+)
+
+
+def run_remote_command(command):
+    """Run a command on the Apple Container host via SSH."""
+    result = subprocess.run(
+        [
+            "ssh",
+            "-i",
+            APPLE_CONTAINER_SSH_KEY,
+            "-o",
+            "BatchMode=yes",
+            APPLE_CONTAINER_HOST,
+            command,
+        ],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+
+    return result.stdout.strip()
+
+
+def get_apple_container_info():
+    """Collect Apple Container information from the remote host."""
+    output = run_remote_command(f"'{APPLE_CONTAINER_CLI}' list --format json")
+
+    return json.loads(output)
+
+
+def get_apple_container_summary():
+    """Return a concise summary of Apple Containers."""
+    containers = get_apple_container_info()
+
+    summary = []
+
+    for container in containers:
+        configuration = container.get("configuration", {})
+        status = container.get("status", {})
+
+        summary.append(
+            {
+                "id": container.get("id"),
+                "state": status.get("state"),
+                "image": configuration.get("image", {}).get("reference"),
+                "ports": configuration.get("publishedPorts", []),
+            }
+        )
+
+    return summary
+
+
+def get_apple_container_stats():
+    """Collect resource usage statistics from Apple Containers."""
+    output = run_remote_command(
+        f"'{APPLE_CONTAINER_CLI}' stats --no-stream --format json"
+    )
+
+    return json.loads(output)
+
+
+def get_apple_container_stats_summary():
+    """Return a concise summary of Apple Container resource usage."""
+    stats = get_apple_container_stats()
+
+    summary = []
+
+    for container in stats:
+        memory_limit = container.get("memoryLimitBytes", 0)
+        memory_usage = container.get("memoryUsageBytes", 0)
+
+        memory_usage_gb = memory_usage / (1024**3)
+        memory_limit_gb = memory_limit / (1024**3)
+
+        memory_percent = (memory_usage / memory_limit) * 100 if memory_limit else 0
+
+        summary.append(
+            {
+                "id": container.get("id"),
+                "memory_usage_gb": round(memory_usage_gb, 2),
+                "memory_limit_gb": round(memory_limit_gb, 2),
+                "memory_percent": round(memory_percent, 1),
+                "cpu_usage_seconds": round(
+                    container.get("cpuUsageUsec", 0) / 1_000_000,
+                    1,
+                ),
+                "processes": container.get("numProcesses", 0),
+            }
+        )
+
+    return summary
 
 
 def get_system_info():
@@ -203,6 +301,40 @@ def main():
 
     print_section("Memory", get_memory_info())
     print_section("Disk", get_disk_info())
+    print()
+    print("=" * 50)
+    print("Apple Containers")
+    print("=" * 50)
+
+    stats = get_apple_container_stats_summary()
+    for container in get_apple_container_summary():
+        print(f"Container: {container['id']}")
+        print(f"  State: {container['state']}")
+        print(f"  Image: {container['image']}")
+        ports = container["ports"]
+        port_text = (
+            ", ".join(
+                f"{port['hostPort']} -> {port['containerPort']}/{port['proto']}"
+                for port in ports
+            )
+            if ports
+            else "None"
+        )
+        print(f"  Published Ports: {port_text}")
+
+        container_stats = next(
+            (item for item in stats if item["id"] == container["id"]),
+            None,
+        )
+
+        if container_stats:
+            print(
+                f"  Memory: {container_stats['memory_usage_gb']} GB "
+                f"/ {container_stats['memory_limit_gb']} GB "
+                f"({container_stats['memory_percent']}%)"
+            )
+            print(f"  CPU Time: {container_stats['cpu_usage_seconds']} seconds")
+            print(f"  Processes: {container_stats['processes']}")
 
     print()
     print("Diagnostic completed.")
