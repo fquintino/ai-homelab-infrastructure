@@ -105,6 +105,15 @@ def check_gateway_connectivity(gateway):
     return result.returncode == 0
 
 
+def check_dns_resolution(hostname):
+    """Check DNS resolution for a hostname."""
+    try:
+        socket.gethostbyname(hostname)
+        return True
+    except socket.gaierror:
+        return False
+
+
 def get_memory_info():
     """Collect basic memory information."""
     memory = psutil.virtual_memory()
@@ -162,6 +171,8 @@ def main():
     print(f"Gateway Interface: {route['interface']}")
     gateway_reachable = check_gateway_connectivity(route["gateway"])
     print(f"Gateway Reachable: {'YES' if gateway_reachable else 'NO'}")
+    dns_working = check_dns_resolution("github.com")
+    print(f"DNS Resolution: {'YES' if dns_working else 'NO'}")
     print()
 
     for interface in get_network_info():
