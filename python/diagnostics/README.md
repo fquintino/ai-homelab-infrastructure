@@ -39,6 +39,7 @@ Current capabilities:
 * Default gateway interface detection
 * Default gateway connectivity check
 * DNS resolution check
+* Network reachability check
 
 ## Requirements
 
@@ -86,7 +87,7 @@ Advanced network diagnostics:
 * Default gateway interface detection
 * Default gateway connectivity check
 * DNS resolution check
-* Network reachability
+* Network reachability check
 
 ### v0.3
 

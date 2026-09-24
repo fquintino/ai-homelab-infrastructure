@@ -114,6 +114,17 @@ def check_dns_resolution(hostname):
         return False
 
 
+def check_network_reachability(hostname):
+    """Check network reachability for a hostname."""
+    result = subprocess.run(
+        ["ping", "-c", "1", hostname],
+        capture_output=True,
+        text=True,
+    )
+
+    return result.returncode == 0
+
+
 def get_memory_info():
     """Collect basic memory information."""
     memory = psutil.virtual_memory()
@@ -173,6 +184,8 @@ def main():
     print(f"Gateway Reachable: {'YES' if gateway_reachable else 'NO'}")
     dns_working = check_dns_resolution("github.com")
     print(f"DNS Resolution: {'YES' if dns_working else 'NO'}")
+    network_reachable = check_network_reachability("github.com")
+    print(f"Network Reachability: {'YES' if network_reachable else 'NO'}")
     print()
 
     for interface in get_network_info():
