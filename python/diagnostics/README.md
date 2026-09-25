@@ -13,7 +13,7 @@ The diagnostic tool will eventually collect and analyze information from:
 * Memory
 * Storage
 * Network
-* Docker
+* Container runtimes
 * Prometheus
 * Infrastructure services
 
@@ -40,6 +40,12 @@ Current capabilities:
 * Default gateway connectivity check
 * DNS resolution check
 * Network reachability check
+* Remote Apple Container detection
+* Container state and image detection
+* Published port detection
+* Container memory usage and limits
+* Container CPU time
+* Container process count
 
 ## Requirements
 
@@ -91,13 +97,15 @@ Advanced network diagnostics:
 
 ### v0.3
 
-Docker diagnostics:
+Container diagnostics:
 
 * Running containers
-* Container status
-* Restart counts
-* CPU usage
-* Memory usage
+* Container state
+* Container image
+* Published ports
+* Memory usage and limits
+* CPU time
+* Process count
 
 ### v0.4
 
@@ -165,7 +173,7 @@ Python Diagnostics
        ├── Memory
        ├── Storage
        ├── Network
-       └── Docker
+       └── Container Runtime
               │
               ▼
           Prometheus
@@ -185,7 +193,7 @@ This project demonstrates practical experience with:
 * Linux
 * Infrastructure
 * Networking
-* Docker
+* Containerization
 * Monitoring
 * Prometheus
 * APIs
