@@ -29,20 +29,31 @@ APPLE_CONTAINER_CLI = (
 
 def run_remote_command(command):
     """Run a command on the Apple Container host via SSH."""
-    result = subprocess.run(
-        [
-            "ssh",
-            "-i",
-            APPLE_CONTAINER_SSH_KEY,
-            "-o",
-            "BatchMode=yes",
-            APPLE_CONTAINER_HOST,
-            command,
-        ],
-        capture_output=True,
-        text=True,
-        check=True,
-    )
+    try:
+        result = subprocess.run(
+            [
+                "ssh",
+                "-i",
+                APPLE_CONTAINER_SSH_KEY,
+                "-o",
+                "BatchMode=yes",
+                APPLE_CONTAINER_HOST,
+                command,
+            ],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+    except subprocess.CalledProcessError as error:
+
+        error_message = (
+            error.stderr.strip() or "remote command returned a non-zero exit status"
+        )
+
+        raise RuntimeError(
+            f"Failed to execute remote command on {APPLE_CONTAINER_HOST}: "
+            f"{error_message}"
+        ) from error
 
     return result.stdout.strip()
 
