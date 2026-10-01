@@ -43,7 +43,14 @@ def run_remote_command(command):
             capture_output=True,
             text=True,
             check=True,
+            timeout=10,
         )
+
+    except subprocess.TimeoutExpired as error:
+        raise RuntimeError(
+            f"Timed out executing remote command on {APPLE_CONTAINER_HOST}"
+        ) from error
+
     except subprocess.CalledProcessError as error:
 
         error_message = (
@@ -317,8 +324,15 @@ def main():
     print("Apple Containers")
     print("=" * 50)
 
-    stats = get_apple_container_stats_summary()
-    for container in get_apple_container_summary():
+    try:
+        stats = get_apple_container_stats_summary()
+        containers = get_apple_container_summary()
+    except RuntimeError as error:
+        print(f"Unable to collect Apple Container diagnostics: {error}")
+        containers = []
+        stats = []
+
+    for container in containers:
         print(f"Container: {container['id']}")
         print(f"  State: {container['state']}")
         print(f"  Image: {container['image']}")
