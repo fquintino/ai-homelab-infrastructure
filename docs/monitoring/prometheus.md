@@ -63,7 +63,7 @@ Prometheus runs as a containerized application on TrueNAS.
 Current image:
 
 ```text
-prom/prometheus:v3.14.0
+prom/prometheus:v3.15.0
 ```
 
 The container is managed as part of the TrueNAS application infrastructure.
@@ -71,10 +71,7 @@ The container is managed as part of the TrueNAS application infrastructure.
 The Prometheus service is configured with:
 
 * Global scrape interval
-* Scrape timeout
 * Evaluation interval
-* Data retention
-* Storage limits
 * Target definitions
 
 ---
@@ -115,6 +112,19 @@ Grafana
 ```
 
 Prometheus periodically requests metrics from configured targets.
+
+## Current Targets
+
+The current Prometheus configuration on TrueNAS monitors the following endpoints:
+
+| Job | Target | Purpose |
+|---|---|---|
+| prometheus | localhost:30104 | Prometheus self-monitoring |
+| node-exporter | 192.168.1.11:9100 | TrueNAS system metrics |
+| smartctl | 192.168.1.11:9633 | Storage health and SMART metrics |
+| graphite-exporter | 192.168.1.11:9108 | Graphite-compatible metrics |
+
+All four targets are currently reporting `up` in the Prometheus target API.
 
 A typical exporter endpoint looks like:
 
@@ -182,7 +192,7 @@ Disk health metrics can be used to detect potential hardware problems before a d
 Container:
 
 ```text
-prom/graphite-exporter:latest
+ghcr.io/supporterino/truenas-graphite-to-prometheus:latest
 ```
 
 Graphite Exporter provides compatibility between Graphite-formatted metrics and Prometheus.
